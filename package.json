@@ -1,0 +1,67 @@
+{
+  "name": "@oblique-code/exit-intent",
+  "version": "1.0.0",
+  "description": "Modern, framework-agnostic exit-intent detection with an accessible, Tailwind-styled modal. Zero dependencies.",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:js": "tsup",
+    "build:css": "postcss src/styles.css -o dist/styles.css",
+    "build": "npm run build:js && npm run build:css",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "exit-intent",
+    "exit-popup",
+    "modal",
+    "tailwind",
+    "conversion",
+    "popup",
+    "cart-abandonment",
+    "mouseleave",
+    "lead-capture"
+  ],
+  "author": "oblique-code",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "happy-dom": "^15.0.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.0.0"
+  }
+}

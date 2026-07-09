@@ -1,0 +1,146 @@
+/*
+ * Fallback stylesheet for @oblique-code/exit-intent.
+ *
+ * Import this ONLY when your app does not run Tailwind itself:
+ *   import '@oblique-code/exit-intent/styles.css'
+ *
+ * `@reference` pulls in Tailwind's theme + utilities so `@apply` resolves, WITHOUT
+ * emitting Tailwind's preflight/reset — so this file is safe to drop into any page.
+ * The utility strings below mirror `TW`/`THEMES` in `src/modal.js` and `P` in
+ * `src/presets.js`; keep them in sync.
+ */
+
+@reference "tailwindcss";
+
+/* ---- core modal ---- */
+
+.oei-overlay {
+  @apply fixed inset-0 z-[2147483000] flex items-center justify-center bg-slate-950/70 p-4 opacity-0 backdrop-blur-sm transition-opacity duration-200 ease-out;
+  box-sizing: border-box;
+}
+.oei-overlay *,
+.oei-overlay *::before,
+.oei-overlay *::after {
+  box-sizing: border-box;
+}
+.oei-overlay.oei-overlay--open {
+  @apply opacity-100;
+}
+
+.oei-dialog {
+  @apply relative w-full max-w-md scale-95 rounded-2xl bg-white p-6 text-slate-900 shadow-2xl transition-transform duration-200 ease-out sm:p-8 dark:bg-slate-900 dark:text-slate-100;
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+}
+.oei-dialog.oei-dialog--open {
+  @apply scale-100;
+}
+
+/*
+ * p-0/border-0/bg-transparent are explicit resets: host pages commonly define a
+ * generic `button { padding/border/background }` rule, and a plain type selector
+ * still wins any property this class doesn't itself declare — omitting these lets
+ * a 36px icon button collapse to 0 width under such a rule.
+ */
+.oei-close {
+  @apply absolute right-3 top-3 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+}
+.oei-close svg {
+  @apply shrink-0;
+}
+
+.oei-title {
+  @apply m-0 pr-8 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl dark:text-white;
+}
+
+.oei-body {
+  @apply mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300;
+}
+.oei-body p {
+  @apply m-0;
+}
+.oei-body p + p {
+  @apply mt-2;
+}
+
+.oei-actions {
+  @apply mt-6 flex flex-col gap-2 sm:flex-row-reverse;
+}
+
+.oei-cta {
+  @apply inline-flex cursor-pointer items-center justify-center rounded-xl border-0 px-5 py-2.5 text-sm font-medium no-underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900;
+}
+
+/* CTA accent themes — mirror THEMES in src/modal.js. All AA-contrast pairs. */
+.oei-cta--slate {
+  @apply bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-500 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200;
+}
+.oei-cta--indigo {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:hover:text-indigo-950;
+}
+.oei-cta--emerald {
+  @apply bg-emerald-700 text-white hover:bg-emerald-800 focus-visible:ring-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400;
+}
+.oei-cta--rose {
+  @apply bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500 dark:bg-rose-500 dark:hover:bg-rose-400 dark:hover:text-rose-950;
+}
+.oei-cta--amber {
+  @apply bg-amber-400 text-amber-950 hover:bg-amber-300 focus-visible:ring-amber-500;
+}
+
+.oei-dismiss {
+  @apply inline-flex cursor-pointer items-center justify-center rounded-xl border-0 bg-transparent px-5 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white;
+}
+
+/* ---- preset elements (src/presets.js) ---- */
+
+.oei-eyebrow {
+  @apply mb-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-800 dark:text-slate-300;
+}
+
+.oei-coupon {
+  @apply mt-4 flex w-full cursor-pointer select-all items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-3 font-mono text-lg font-semibold tracking-[0.2em] text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white;
+}
+
+.oei-coupon-hint {
+  @apply mt-2 text-center text-xs text-slate-500 dark:text-slate-400;
+}
+
+.oei-field {
+  @apply mt-4;
+}
+
+.oei-input {
+  @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400;
+}
+.oei-input.oei-input--error {
+  @apply border-rose-500 focus:border-rose-500 focus:ring-rose-500;
+}
+
+.oei-error {
+  @apply mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400;
+}
+
+/* Utilities the presets rely on, for pages without Tailwind. */
+.oei-dialog [hidden] {
+  display: none !important;
+}
+.oei-dialog .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Honor reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .oei-overlay,
+  .oei-dialog {
+    @apply transition-none;
+  }
+}

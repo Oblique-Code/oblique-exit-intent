@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@oblique-code/exit-intent — demo</title>
+    <!-- Fallback CSS (built via `npm run build`). Remove if your page uses Tailwind. -->
+    <link rel="stylesheet" href="../dist/styles.css" />
+    <style>
+      body {
+        font: 16px/1.6 system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      main {
+        max-width: 40rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      code {
+        background: #e2e8f0;
+        padding: 0.15em 0.4em;
+        border-radius: 0.35rem;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.2rem;
+        border: 0;
+        border-radius: 0.6rem;
+        background: #0f172a;
+        color: #fff;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Exit-intent demo</h1>
+      <p>
+        Move your mouse <strong>up out of the top of the window</strong> (toward the tab bar) to
+        trigger the modal. The <code>cooldown</code> is set low so you can retry quickly.
+      </p>
+      <p>Or preview the ready-made presets:</p>
+      <button id="preset-discount">🎟️ Discount</button>
+      <button id="preset-newsletter">📬 Newsletter</button>
+      <button id="preset-cart">🛒 Cart saver</button>
+    </main>
+
+    <script type="module">
+      import { exitIntent, ExitModal, presets } from '../dist/index.js'
+
+      // Exit-intent wiring (top-edge) → discount preset.
+      exitIntent({
+        threshold: 20,
+        cooldown: '10s', // short for demoing
+        maxDisplays: 99,
+        modal: presets.discount({ code: 'OBLIQUE10', onClaim: () => alert('Coupon applied!') }),
+        onExit: ({ reason }) => console.log('[exit-intent] fired:', reason),
+      })
+
+      // Manual preset previews.
+      const open = (opts) => () => new ExitModal(opts).open()
+      document.getElementById('preset-discount').addEventListener(
+        'click',
+        open(presets.discount({ discount: '15%', code: 'SAVE15' })),
+      )
+      document.getElementById('preset-newsletter').addEventListener(
+        'click',
+        open(presets.newsletter({ onSubmit: (email) => alert(`Subscribed: ${email}`) })),
+      )
+      document.getElementById('preset-cart').addEventListener(
+        'click',
+        open(presets.cartSaver({ onResume: () => alert('Back to cart!') })),
+      )
+    </script>
+  </body>
+</html>
