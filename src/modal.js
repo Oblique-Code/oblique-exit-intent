@@ -91,6 +91,19 @@ function escapeHtml(str) {
   )
 }
 
+/**
+ * Reject script-capable URL schemes so a CTA href sourced from CMS/user data
+ * can't execute code. Relative URLs and http(s)/mailto/tel pass through.
+ * Browsers ignore ASCII whitespace/control chars inside schemes, so strip them first.
+ * @param {string} href
+ * @returns {string|null} The href, or null when unsafe.
+ */
+function safeHref(href) {
+  // eslint-disable-next-line no-control-regex
+  const normalized = String(href).replace(/[\u0000- \u007f]/g, '').toLowerCase()
+  return /^(javascript|data|vbscript):/.test(normalized) ? null : String(href)
+}
+
 let uid = 0
 
 /**
@@ -120,6 +133,7 @@ export class ExitModal {
     this._dialog = null
     this._lastActive = null
     this._prevOverflow = ''
+    this._removeTimer = null
     this._onKeydown = (e) => this._handleKeydown(e)
   }
 
@@ -178,19 +192,28 @@ export class ExitModal {
       actionsEl = doc.createElement('div')
       actionsEl.className = TW.actions
       if (o.cta) {
-        const cta = o.cta.href ? doc.createElement('a') : doc.createElement('button')
+        const href = o.cta.href ? safeHref(o.cta.href) : null
+        if (o.cta.href && !href) {
+          // eslint-disable-next-line no-console
+          console.warn('[exit-intent] blocked unsafe CTA href:', o.cta.href)
+        }
+        const cta = href ? doc.createElement('a') : doc.createElement('button')
         cta.className = `${TW.cta} ${THEMES[o.theme] || THEMES.slate}`
         cta.textContent = o.cta.label
-        if (o.cta.href) {
-          cta.href = o.cta.href
-          if (o.cta.target) cta.target = o.cta.target
+        if (href) {
+          cta.href = href
+          if (o.cta.target) {
+            cta.target = o.cta.target
+            // Prevent reverse tabnabbing via window.opener.
+            if (o.cta.target === '_blank') cta.rel = 'noopener noreferrer'
+          }
         } else {
           cta.type = 'button'
         }
         cta.addEventListener('click', (e) => {
           if (o.cta.onClick?.() === false) {
             // Handler vetoed (e.g. validation failed) — keep the modal open.
-            if (o.cta.href) e.preventDefault()
+            if (href) e.preventDefault()
             return
           }
           this.close('cta')
@@ -225,6 +248,11 @@ export class ExitModal {
   /** Mount + reveal the modal. @returns {this} */
   open() {
     if (this.isOpen) return this
+    // Re-opened during the close transition: cancel the pending unmount.
+    if (this._removeTimer) {
+      clearTimeout(this._removeTimer)
+      this._removeTimer = null
+    }
     const overlay = this.render()
     const container = this.options.container || document.body
     this._lastActive = document.activeElement
@@ -239,14 +267,16 @@ export class ExitModal {
 
     // Next frame → trigger the transition, then move focus in.
     const reveal = () => {
+      // Closed or destroyed before this frame ran — don't steal focus.
+      if (!this.isOpen || this._overlay !== overlay) return
       overlay.classList.add(...TW.overlayOpen.split(' '))
       this._dialog.classList.add(...TW.dialogOpen.split(' '))
       this._focusFirst()
     }
+    this.isOpen = true
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal)
     else reveal()
 
-    this.isOpen = true
     this.options.onOpen?.()
     return this
   }
@@ -267,10 +297,13 @@ export class ExitModal {
 
     if (this.options.lockScroll) document.body.style.overflow = this._prevOverflow
 
-    const remove = () => overlay.parentNode && overlay.parentNode.removeChild(overlay)
+    const remove = () => {
+      this._removeTimer = null
+      overlay.parentNode && overlay.parentNode.removeChild(overlay)
+    }
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reduced) remove()
-    else setTimeout(remove, 220)
+    else this._removeTimer = setTimeout(remove, 220)
 
     // Restore focus to the element that was focused before opening.
     if (this._lastActive && typeof this._lastActive.focus === 'function') {
@@ -283,6 +316,9 @@ export class ExitModal {
   /** Remove the modal from the DOM immediately and drop references. */
   destroy() {
     this.close('programmatic')
+    if (this._removeTimer) clearTimeout(this._removeTimer)
+    this._removeTimer = null
+    this._overlay?.remove()
     this._overlay = null
     this._dialog = null
   }

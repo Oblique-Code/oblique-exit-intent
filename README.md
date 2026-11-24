@@ -1,7 +1,8 @@
 # @oblique-code/exit-intent
 
 > Modern, framework-agnostic **exit-intent detection** with an accessible,
-> Tailwind-styled modal. Zero runtime dependencies. ~3&nbsp;kB gzipped.
+> Tailwind-styled modal. Zero runtime dependencies. ~5.8&nbsp;kB gzipped JS
+> (+ ~3.4&nbsp;kB optional CSS).
 
 Detect when a visitor is about to leave — mouse racing for the tab bar on
 desktop, or inactivity / fast scroll-up / Back-button on mobile — and (optionally)
@@ -20,7 +21,35 @@ show a polished modal to win them back.
 npm install @oblique-code/exit-intent
 ```
 
-## Quick start
+## Plug & play (no build step)
+
+Drop these two lines into any static HTML page — no npm, no bundler, no config.
+The package is loaded straight from a CDN as native ES modules.
+
+```html
+<!-- 1. Styles (the fallback CSS — omit this line if your page already runs Tailwind) -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@oblique-code/exit-intent@1/dist/styles.css"
+/>
+
+<!-- 2. Behaviour -->
+<script type="module">
+  import { exitIntent, presets } from 'https://cdn.jsdelivr.net/npm/@oblique-code/exit-intent@1/+esm'
+
+  exitIntent({
+    cooldown: '7d',
+    maxDisplays: 1,
+    modal: presets.discount({ discount: '10%', code: 'SAVE10' }),
+  })
+</script>
+```
+
+That's the whole integration — paste it before `</body>` and you're done. Pin a
+version (`@1.0.0`) instead of `@1` if you want to lock the exact release.
+[`unpkg`](https://unpkg.com) and [`esm.sh`](https://esm.sh) work too.
+
+## Quick start (with a bundler)
 
 ```js
 import { exitIntent } from '@oblique-code/exit-intent'
@@ -133,6 +162,33 @@ exitIntent({
 })
 ```
 
+### React / Next.js
+
+Set it up once in an effect and tear it down on unmount. Guard for the client
+since the detector needs `window` (harmless no-op during SSR, but skip the effect
+body on the server).
+
+```jsx
+import { useEffect } from 'react'
+import { exitIntent, presets } from '@oblique-code/exit-intent'
+import '@oblique-code/exit-intent/styles.css'
+
+export function ExitIntent() {
+  useEffect(() => {
+    const handle = exitIntent({
+      cooldown: '7d',
+      maxDisplays: 1,
+      modal: presets.newsletter({ onSubmit: (email) => subscribe(email) }),
+    })
+    return () => handle.destroy() // clean up listeners + modal on unmount
+  }, [])
+  return null
+}
+```
+
+The same pattern applies to Vue (`onMounted`/`onUnmounted`), Svelte (`onMount`),
+etc. — construct in the mount hook, call `handle.destroy()` in the cleanup hook.
+
 ## API
 
 ### `exitIntent(config)` → handle
@@ -191,7 +247,9 @@ anchor; otherwise a button. `onClick` may return `false` to keep the modal open
 **Methods:** `open()`, `close(reason?)`, `render()`, `destroy()`.
 
 > **Security:** `html` is inserted verbatim — only pass trusted markup. Use `text`
-> for anything user-derived; it is escaped for you.
+> for anything user-derived; it is escaped for you. CTA `href`s using
+> `javascript:`, `data:` or `vbscript:` are blocked (rendered as a plain button),
+> and `target: '_blank'` links get `rel="noopener noreferrer"` automatically.
 
 ## Browser support
 

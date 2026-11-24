@@ -109,6 +109,7 @@ export class ExitIntentDetector extends Emitter {
     this._idleTimer = null
     this._lastScrollY = 0
     this._bound = null
+    this._historyTrapped = false
 
     if (options.onExit) this.on('exit', options.onExit)
     if (this.options.autoStart) this.start()
@@ -164,7 +165,12 @@ export class ExitIntentDetector extends Emitter {
       }
       if (mobile.backButton) {
         try {
-          history.pushState({ oei: true }, '')
+          // Only one trap entry at a time, so stop()/start() cycles don't pile
+          // up history entries the visitor must click Back through.
+          if (!this._historyTrapped) {
+            history.pushState({ oei: true }, '')
+            this._historyTrapped = true
+          }
           window.addEventListener('popstate', b.popstate)
         } catch {
           /* history unavailable */
@@ -255,6 +261,7 @@ export class ExitIntentDetector extends Emitter {
   }
 
   _onPopState() {
+    this._historyTrapped = false
     this._fire('mobile-back')
   }
 
