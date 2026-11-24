@@ -97,3 +97,19 @@ describe('ExitIntentDetector (desktop)', () => {
     expect(onExit).not.toHaveBeenCalled()
   })
 })
+
+describe('ExitIntentDetector (mobile back button)', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('pushes only one history entry across stop/start cycles', () => {
+    vi.spyOn(ExitIntentDetector.prototype, '_isTouch', 'get').mockReturnValue(true)
+    const push = vi.spyOn(history, 'pushState')
+    const d = new ExitIntentDetector({
+      storageKey: 'oei:back',
+      mobile: { backButton: true, inactivity: false, scrollUp: false },
+    })
+    d.stop().start().stop().start()
+    expect(push).toHaveBeenCalledTimes(1)
+    d.destroy()
+  })
+})

@@ -98,4 +98,39 @@ describe('ExitModal', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }))
     expect(document.activeElement).toBe(last) // wrapped to last
   })
+
+  it('blocks script-capable CTA hrefs', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    for (const href of ['javascript:alert(1)', ' JaVa\tScRiPt:alert(1)', 'data:text/html,x', 'vbscript:x']) {
+      const overlay = new ExitModal({ cta: { label: 'Go', href } }).render()
+      expect(overlay.querySelector('a.oei-cta')).toBeNull()
+      expect(overlay.querySelector('button.oei-cta')).not.toBeNull()
+    }
+    const ok = new ExitModal({ cta: { label: 'Go', href: '/cart' } }).render()
+    expect(ok.querySelector('a.oei-cta').getAttribute('href')).toBe('/cart')
+    warn.mockRestore()
+  })
+
+  it('adds rel=noopener noreferrer for target=_blank', () => {
+    const overlay = new ExitModal({ cta: { label: 'Go', href: '/x', target: '_blank' } }).render()
+    expect(overlay.querySelector('a.oei-cta').rel).toBe('noopener noreferrer')
+  })
+
+  it('stays mounted when re-opened during the close transition', () => {
+    vi.useFakeTimers()
+    const modal = new ExitModal({ title: 'Hi' })
+    modal.open()
+    modal.close()
+    modal.open()
+    vi.advanceTimersByTime(500)
+    expect(document.querySelector('.oei-overlay')).not.toBeNull()
+    expect(modal.isOpen).toBe(true)
+  })
+
+  it('removes the overlay immediately on destroy', () => {
+    const modal = new ExitModal({ title: 'Hi' })
+    modal.open()
+    modal.destroy()
+    expect(document.querySelector('.oei-overlay')).toBeNull()
+  })
 })
