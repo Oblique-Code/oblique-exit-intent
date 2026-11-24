@@ -29,6 +29,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   advisories (dev-only; the package has no runtime dependencies).
 - Developing and building the package now requires Node.js ≥ 22.18. Consumers
   are unaffected.
+- Added `repository`, `homepage` and `bugs` fields so npm links to the GitHub repo.
 
 ## [1.0.1] - 2026-07-09
 

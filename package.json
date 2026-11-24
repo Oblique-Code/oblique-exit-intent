@@ -48,6 +48,14 @@
     "lead-capture"
   ],
   "author": "oblique-code",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oblique-Code/oblique-exit-intent.git"
+  },
+  "homepage": "https://github.com/Oblique-Code/oblique-exit-intent#readme",
+  "bugs": {
+    "url": "https://github.com/Oblique-Code/oblique-exit-intent/issues"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
